@@ -1,0 +1,71 @@
+{
+  "id": "cn.edu.hainanu.qz",
+  "name": "海南大学",
+  "version": "1.0.1",
+  "apiVersion": 3,
+  "kind": "extension",
+  "extends": "builtin.qz",
+  "entry": "index.js",
+  "capabilities": [
+    "auth.start",
+    "auth.resume",
+    "auth.refreshCaptcha",
+    "auth.validate"
+  ],
+  "network": [
+    {
+      "origin": "https://jxgl.hainanu.edu.cn",
+      "pathPrefix": "/jsxsd",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "purposes": [
+        "auth",
+        "query"
+      ]
+    }
+  ],
+  "school": {
+    "id": "cn.edu.hainanu",
+    "name": "海南大学",
+    "domain": "jxgl.hainanu.edu.cn",
+    "protocol": "https",
+    "basePath": "/jsxsd",
+    "academicSystem": "qz",
+    "pageCharset": "UTF-8",
+    "userAgent": "Mozilla/5.0 (Linux; Android 13; 2201123C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+  },
+  "category": "school",
+  "description": "海南大学教务一体化系统（强智新一代）原生登录适配：在 App 内直接使用统一身份认证账号与图片验证码登录，并复用内置新强智协议提供学期、课表、成绩、考试与选课查询。",
+  "features": [
+    "App 内原生账号密码登录",
+    "官方登录页图片验证码",
+    "学期与课表",
+    "成绩与成绩明细",
+    "考试安排",
+    "选课与退选（以学校开放范围为准）"
+  ],
+  "license": "GPL-3.0-only",
+  "maintainers": [
+    {
+      "name": "海南大学插件维护者"
+    }
+  ],
+  "maintenance": "active",
+  "requires": [
+    {
+      "name": "network.request",
+      "version": 2
+    }
+  ],
+  "verifiedScope": [
+    "2026-10-12 依据公开登录页实现原生密码登录：表单 POST /jsxsd/xk/LoginToXkLdap，字段 userAccount/userPassword/RANDOMCODE/loginMethod/encoded，图片验证码 /jsxsd/verifycode.servlet（实测 image/jpeg）",
+    "encoded 按学校 conwork.js 的 encodeInp() 复刻：base64 按 UTF-16 代码单元编码并用 '=' 补齐；页面在登录时清空 userPassword，插件与该行为一致",
+    "登录编码串只在两次交互之间保存在宿主会话状态（与内置协议的会话保留方式相同），登录成功或凭据被拒后立即清除，不写入持久存储、日志或样本",
+    "离线回归使用 18 个合成用例，覆盖登录页与验证码、刷新验证码、验证码错误重试、提交成功后的身份校验、会话校验、登录页无法识别时的诊断、无 form 标签的登录页，以及学期、课表、成绩、成绩明细、考试、选课轮次、课程、教学班、已选、选课和退课",
+    "尚未执行真实账号、Android 真机、历史学期与选课开放状态验收；写操作只在合成样本中验证，样本不代表学校实测"
+  ],
+  "releaseNotes": "1.0.1：登录页识别放宽（不依赖 form 标签与固定字段名）、仅在同源时跟随一次页面跳转、请求使用浏览器 UA，并在无法识别登录页时返回可核实的诊断信息。",
+  "files": {}
+}

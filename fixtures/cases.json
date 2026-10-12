@@ -1,0 +1,814 @@
+[
+  {
+    "name": "unrecognised page reports bounded diagnostics",
+    "operation": "auth.start",
+    "args": {
+      "username": "2026000001",
+      "password": "synthetic-password"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<html><head><title>安全提示</title></head><body><h2>正在校验访问环境</h2><p>请稍候，页面将自动跳转。</p></body></html>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<html><body>系统维护中</body></html>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": false,
+      "error": {
+        "code": "PAGE_CHANGED"
+      }
+    }
+  },
+  {
+    "name": "login page without a form tag is still driven",
+    "operation": "auth.start",
+    "args": {
+      "username": "2026000001",
+      "password": "synthetic-password"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<html><head><title>登录</title></head><body><div class=\"login\"><input type=\"text\" id=\"userAccount\" name=\"userAccount\"><input type=\"password\" id=\"userPassword\" name=\"userPassword\"><input type=\"text\" id=\"RANDOMCODE\" name=\"RANDOMCODE\"><img src=\"/jsxsd/verifycode.servlet\" id=\"SafeCodeImg\"></div><script>function go(){ document.location.href='/jsxsd/xk/LoginToXkLdap'; }</script></body></html>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+          "headers": {
+            "Content-Type": "image/jpeg;charset=UTF-8"
+          },
+          "body": "aW1hZ2U="
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha"
+      }
+    }
+  },
+  {
+    "name": "school login page then captcha image",
+    "operation": "auth.start",
+    "args": {
+      "username": "2026000001",
+      "password": "synthetic-password"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>登录</title></head><body><form id=\"loginForm\" name=\"loginForm\" action=\"/jsxsd/xk/LoginToXkLdap\" method=\"post\"><input type=\"hidden\" name=\"loginMethod\" value=\"LoginToXkLdap\"><div class=\"form-item-new\"><span>账号</span><input type=\"text\" id=\"userAccount\" name=\"userAccount\" placeholder=\"请输入账号\"></div><div class=\"form-item-new\"><span>密码</span><input type=\"password\" id=\"userPassword\" name=\"userPassword\" placeholder=\"请输入密码\"></div><div class=\"form-item-new\"><span>验证码</span><input type=\"text\" class=\"form-control\" id=\"RANDOMCODE\" name=\"RANDOMCODE\" placeholder=\"请输入验证码\"><img src=\"/jsxsd/verifycode.servlet\" id=\"SafeCodeImg\" onclick=\"ReShowCode()\" class=\"auth-code-img\"/></div><font color=\"red\" size=\"2\" id=\"showMsg\"> </font><a href=\"https://authserver.hainanu.edu.cn/retrieve-password/retrievePassword/index.html?\">忘记密码</a><a class=\"btn-login-new\" id=\"btn-login\" onclick=\"submitForm1()\">登录</a><input name=\"encoded\" id=\"encoded\" type=\"hidden\" value=\"\"/></form><script src=\"/jsxsd/js/conwork.js\"></script><script language=\"javascript\">function ReShowCode(){var img=document.getElementById(\"SafeCodeImg\");img.src=\"/jsxsd/verifycode.servlet?t=\"+Math.random();}function submitForm1(){var xh=document.getElementById(\"userAccount\").value;var pwd=document.getElementById(\"userPassword\").value;var encoded=encodeInp(xh)+\"%%%\"+encodeInp(pwd);document.getElementById(\"encoded\").value=encoded;if(\"LoginToXkLdap\"!=\"logonLdap\"){document.getElementById(\"userPassword\").value=\"\";}document.getElementById(\"loginForm\").submit();}</script></body></html>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+          "headers": {
+            "Content-Type": "image/jpeg;charset=UTF-8"
+          },
+          "body": "aW1hZ2U="
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha",
+        "mimeType": "image/jpeg"
+      }
+    },
+    "capture": "login"
+  },
+  {
+    "name": "refresh keeps continuation and returns a new image",
+    "operation": "auth.refreshCaptcha",
+    "args": {
+      "continuationId": {
+        "$ref": "login.continuationId"
+      }
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+          "headers": {
+            "Content-Type": "image/jpeg;charset=UTF-8"
+          },
+          "body": "aW1hZ2U="
+        },
+        "ignoreQuery": [
+          "_"
+        ]
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha",
+        "continuationId": {
+          "$ref": "login.continuationId"
+        }
+      }
+    }
+  },
+  {
+    "name": "wrong captcha re-challenges instead of failing the login",
+    "operation": "auth.resume",
+    "args": {
+      "continuationId": {
+        "$ref": "login.continuationId"
+      },
+      "captcha": "0000"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xk/LoginToXkLdap",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xk/LoginToXkLdap",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<form id=\"loginForm\" action=\"/jsxsd/xk/LoginToXkLdap\" method=\"post\"><input type=\"hidden\" name=\"loginMethod\" value=\"LoginToXkLdap\"><input type=\"text\" id=\"userAccount\" name=\"userAccount\"><input type=\"password\" id=\"userPassword\" name=\"userPassword\"><input type=\"text\" id=\"RANDOMCODE\" name=\"RANDOMCODE\"><img src=\"/jsxsd/verifycode.servlet\" id=\"SafeCodeImg\"/><font color=\"red\" size=\"2\" id=\"showMsg\">验证码错误，请重新输入</font><input name=\"encoded\" id=\"encoded\" type=\"hidden\" value=\"\"/></form>"
+        },
+        "method": "POST",
+        "formSubset": {
+          "loginMethod": "LoginToXkLdap",
+          "userAccount": "2026000001",
+          "userPassword": "",
+          "RANDOMCODE": "0000",
+          "encoded": "MjAyNjAwMDAwMQ==%%%c3ludGhldGljLXBhc3N3b3Jk"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/verifycode.servlet",
+          "headers": {
+            "Content-Type": "image/jpeg;charset=UTF-8"
+          },
+          "body": "aW1hZ2U="
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "captcha"
+      }
+    }
+  },
+  {
+    "name": "encoded submission authenticates the session",
+    "operation": "auth.resume",
+    "args": {
+      "continuationId": {
+        "$ref": "login.continuationId"
+      },
+      "captcha": "1234"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xk/LoginToXkLdap",
+        "purpose": "auth",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        },
+        "method": "POST",
+        "formSubset": {
+          "loginMethod": "LoginToXkLdap",
+          "userAccount": "2026000001",
+          "userPassword": "",
+          "RANDOMCODE": "1234",
+          "encoded": "MjAyNjAwMDAwMQ==%%%c3ludGhldGljLXBhc3N3b3Jk"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "2026000001",
+        "studentName": "合成学生"
+      }
+    }
+  },
+  {
+    "name": "timetable frame confirms the session",
+    "operation": "auth.validate",
+    "args": {},
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV_new.htmlx?t1=1",
+          "headers": {
+            "Content-Type": "text/html;charset=utf-8"
+          },
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "status": "authenticated",
+        "studentId": "2026000001"
+      }
+    }
+  },
+  {
+    "name": "available terms from school controls",
+    "operation": "study.terms",
+    "args": {},
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+          "headers": {},
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "headers": {},
+          "body": "<form method=\"POST\" action=\"/jsxsd/xskb/xskb_list.do\"><select name=\"xnxq01id\"><option value=\"2026-2027-1\" selected>2026-2027-1</option></select><table><tr><th>节次</th><th>星期一</th><th>星期二</th></tr><tr><td>第一节</td><td><div class=\"kbcontent\">离散数学<br>1-2节 1-4周(单)<br>合成教师<br>教室A</div></td><td></td></tr></table></form>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "currentId": "2026-2027-1",
+        "items": [
+          {
+            "id": "2026-2027-1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "odd week timetable is parsed",
+    "operation": "study.schedule",
+    "args": {
+      "termId": "2026-2027-1"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+          "headers": {},
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "headers": {},
+          "body": "<form method=\"POST\" action=\"/jsxsd/xskb/xskb_list.do\"><select name=\"xnxq01id\"><option value=\"2026-2027-1\" selected>2026-2027-1</option></select><table><tr><th>节次</th><th>星期一</th><th>星期二</th></tr><tr><td>第一节</td><td><div class=\"kbcontent\">离散数学<br>1-2节 1-4周(单)<br>合成教师<br>教室A</div></td><td></td></tr></table></form>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xskb/xskb_list.do",
+          "headers": {},
+          "body": "<form method=\"POST\" action=\"/jsxsd/xskb/xskb_list.do\"><select name=\"xnxq01id\"><option value=\"2026-2027-1\" selected>2026-2027-1</option></select><table><tr><th>节次</th><th>星期一</th><th>星期二</th></tr><tr><td>第一节</td><td><div class=\"kbcontent\">离散数学<br>1-2节 1-4周(单)<br>合成教师<br>教室A</div></td><td></td></tr></table></form>"
+        },
+        "method": "POST",
+        "formSubset": {
+          "xnxq01id": "2026-2027-1",
+          "zc": ""
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "termId": "2026-2027-1",
+        "entries": [
+          {
+            "name": "离散数学",
+            "day": 1,
+            "startPeriod": 1,
+            "endPeriod": 2,
+            "weeks": [
+              1,
+              3
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "grade list uses requested term",
+    "operation": "study.grades",
+    "args": {
+      "termId": "2026-2027-1"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+          "headers": {},
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/kscj/cjcx_frm",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/kscj/cjcx_frm",
+          "headers": {},
+          "body": "<form method=\"POST\" action=\"/jsxsd/kscj/cjcx_list\"><select name=\"xnxq01id\"><option value=\"2026-2027-1\" selected>2026-2027-1</option></select><table><tr><th>课程名称</th><th>课程代码</th><th>成绩</th><th>学分</th><th>绩点</th><th>学年</th><th>学期</th></tr><tr><td>离散数学</td><td>C1</td><td>88</td><td>3</td><td>3.8</td><td>2026-2027</td><td>1</td></tr></table></form>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/kscj/cjcx_list",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/kscj/cjcx_list",
+          "headers": {},
+          "body": "<table><tr><th>课程名称</th><th>课程代码</th><th>成绩</th><th>学分</th><th>绩点</th><th>学年</th><th>学期</th></tr><tr><td>离散数学</td><td>C1</td><td>88</td><td>3</td><td>3.8</td><td>2026-2027</td><td>1</td></tr></table>"
+        },
+        "method": "POST",
+        "formSubset": {
+          "kksj": "2026-2027-1",
+          "xsfs": "all"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "name": "离散数学",
+            "score": "88",
+            "credits": "3",
+            "termId": "2026-2027-1"
+          }
+        ]
+      }
+    },
+    "capture": "grades"
+  },
+  {
+    "name": "grade components or honest total-only detail",
+    "operation": "study.gradeDetails",
+    "args": {
+      "gradeId": {
+        "$ref": "grades.items.0.id"
+      }
+    },
+    "http": [],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "gradeId": {
+          "$ref": "grades.items.0.id"
+        },
+        "items": [
+          {
+            "name": "总评（学校未提供分项）",
+            "score": "88"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "exam date seat and room",
+    "operation": "study.exams",
+    "args": {
+      "termId": "2026-2027-1"
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/framework/xsMainV.htmlx",
+          "headers": {},
+          "body": "<input name=\"xh\" value=\"2026000001\"><span class=\"media-heading\">合成学生</span>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsks/xsksap_query",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsks/xsksap_query",
+          "headers": {},
+          "body": "<form method=\"POST\" action=\"/jsxsd/xsks/xsksap_list\"><select name=\"xnxq01id\"><option value=\"2026-2027-1\" selected>2026-2027-1</option></select><table><tr><th>课程名称</th><th>考试时间</th><th>考场</th><th>座位号</th></tr><tr><td>离散数学</td><td>2027-01-02 09:00</td><td>教室A</td><td>12</td></tr></table></form>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsks/xsksap_list",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsks/xsksap_list",
+          "headers": {},
+          "body": "<table><tr><th>课程名称</th><th>考试时间</th><th>考场</th><th>座位号</th></tr><tr><td>离散数学</td><td>2027-01-02 09:00</td><td>教室A</td><td>12</td></tr></table>"
+        },
+        "method": "POST"
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "name": "离散数学",
+            "time": "2027-01-02 09:00",
+            "location": "教室A",
+            "seat": "12"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "discover available Qiangzhi course categories",
+    "operation": "selection.catalog",
+    "args": {},
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/xklc_list",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/xklc_list",
+          "headers": {},
+          "body": "<p>选课</p>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/xklc_list_data?xkmc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/xklc_list_data?xkmc=",
+          "headers": {},
+          "body": "{\"data\":[{\"jx0502zbid\":\"R1\",\"xkzt\":\"1\",\"xklc_mc\":\"合成轮次\",\"xnxq01id\":\"2026-2027-1\"}]}"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+          "headers": {},
+          "body": "<a href=\"/jsxsd/xsxkkc/ggxxkxk\">公共选修</a><a href=\"/jsxsd/xsxkjg/comeXkjglb\">已选</a>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "open": true
+          }
+        ]
+      }
+    },
+    "capture": "rounds"
+  },
+  {
+    "name": "read datatable course parameters",
+    "operation": "selection.courses",
+    "args": {
+      "roundId": {
+        "$ref": "rounds.items.0.id"
+      },
+      "pageSize": 20
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+          "headers": {},
+          "body": "<a href=\"/jsxsd/xsxkkc/ggxxkxk\">公共选修</a><a href=\"/jsxsd/xsxkjg/comeXkjglb\">已选</a>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxk",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxk",
+          "headers": {},
+          "body": "<script>\nfunction query(){ $('#table').dataTable({\n 'sAjaxSource': '/jsxsd/xsxkkc/xsxkGgxxkxk',\n 'aoColumns':[{'mDataProp':'kcmc'},{'mDataProp':'jx0404id'}]\n});}\nfunction xsxkOper(jx0404id,kcid){ $.ajax({\n url: '/jsxsd/xsxkkc/ggxxkxkOper',\n type: 'POST',\n data: {jx0404id:jx0404id,kcid:kcid}\n}); }\n</script>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/xsxkGgxxkxk",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/xsxkGgxxkxk",
+          "headers": {},
+          "body": "{\"aaData\":[{\"kcid\":\"C1\",\"jx0404id\":\"S1\",\"kcmc\":\"离散数学\",\"jsxm\":\"合成教师\"}],\"iTotalRecords\":1}"
+        },
+        "method": "POST",
+        "formSubset": {
+          "iDisplayStart": "0",
+          "iDisplayLength": "20"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "id": "C1",
+            "sectionId": "S1",
+            "name": "离散数学"
+          }
+        ]
+      }
+    },
+    "capture": "courses"
+  },
+  {
+    "name": "reuse standard sections",
+    "operation": "selection.sections",
+    "args": {
+      "roundId": {
+        "$ref": "rounds.items.0.id"
+      },
+      "courseId": {
+        "$ref": "courses.items.0.id"
+      }
+    },
+    "http": [],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "id": "S1",
+            "courseId": "C1"
+          }
+        ]
+      }
+    },
+    "capture": "sections"
+  },
+  {
+    "name": "parse current literal write handler",
+    "operation": "selection.select",
+    "args": {
+      "roundId": {
+        "$ref": "rounds.items.0.id"
+      },
+      "courseId": {
+        "$ref": "courses.items.0.id"
+      },
+      "sectionId": {
+        "$ref": "sections.items.0.id"
+      }
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+          "headers": {},
+          "body": "<a href=\"/jsxsd/xsxkkc/ggxxkxk\">公共选修</a><a href=\"/jsxsd/xsxkjg/comeXkjglb\">已选</a>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxk",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxk",
+          "headers": {},
+          "body": "<script>\nfunction query(){ $('#table').dataTable({\n 'sAjaxSource': '/jsxsd/xsxkkc/xsxkGgxxkxk',\n 'aoColumns':[{'mDataProp':'kcmc'},{'mDataProp':'jx0404id'}]\n});}\nfunction xsxkOper(jx0404id,kcid){ $.ajax({\n url: '/jsxsd/xsxkkc/ggxxkxkOper',\n type: 'POST',\n data: {jx0404id:jx0404id,kcid:kcid}\n}); }\n</script>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxkOper",
+        "purpose": "mutation",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkkc/ggxxkxkOper",
+          "headers": {},
+          "body": "{\"success\":true}"
+        },
+        "method": "POST",
+        "form": {
+          "jx0404id": "S1",
+          "kcid": "C1"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "confirmed": true
+      }
+    },
+    "confirmed": true
+  },
+  {
+    "name": "parse current enrolled controls",
+    "operation": "selection.enrolled",
+    "args": {},
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+          "headers": {},
+          "body": "<a href=\"/jsxsd/xsxkkc/ggxxkxk\">公共选修</a><a href=\"/jsxsd/xsxkjg/comeXkjglb\">已选</a>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/comeXkjglb",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/comeXkjglb",
+          "headers": {},
+          "body": "<table><tr><th>课程代码</th><th>课程名称</th><th>教学班号</th><th>操作</th></tr><tr><td>C1</td><td>离散数学</td><td>S1</td><td><a onclick=\"xstkOper('S1')\">退选</a></td></tr></table><script>function xstkOper(jx0404id){ $.ajax({\n url: '/jsxsd/xsxkjg/xstkOper',\n type: 'POST',\n data: {jx0404id:jx0404id}\n}); }</script>"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "items": [
+          {
+            "courseId": "C1",
+            "name": "离散数学"
+          }
+        ]
+      }
+    },
+    "capture": "enrolled"
+  },
+  {
+    "name": "re-read removal handler before write",
+    "operation": "selection.drop",
+    "args": {
+      "roundId": {
+        "$ref": "rounds.items.0.id"
+      },
+      "courseId": {
+        "$ref": "courses.items.0.id"
+      },
+      "sectionId": {
+        "$ref": "enrolled.items.0.sectionId"
+      },
+      "enrollmentId": {
+        "$ref": "enrolled.items.0.id"
+      }
+    },
+    "http": [
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxk/newXsxkzx?jx0502zbid=R1&isallsc=",
+          "headers": {},
+          "body": "<a href=\"/jsxsd/xsxkkc/ggxxkxk\">公共选修</a><a href=\"/jsxsd/xsxkjg/comeXkjglb\">已选</a>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/comeXkjglb",
+        "purpose": "query",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/comeXkjglb",
+          "headers": {},
+          "body": "<table><tr><th>课程代码</th><th>课程名称</th><th>教学班号</th><th>操作</th></tr><tr><td>C1</td><td>离散数学</td><td>S1</td><td><a onclick=\"xstkOper('S1')\">退选</a></td></tr></table><script>function xstkOper(jx0404id){ $.ajax({\n url: '/jsxsd/xsxkjg/xstkOper',\n type: 'POST',\n data: {jx0404id:jx0404id}\n}); }</script>"
+        }
+      },
+      {
+        "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/xstkOper",
+        "purpose": "mutation",
+        "response": {
+          "status": 200,
+          "url": "https://jxgl.hainanu.edu.cn/jsxsd/xsxkjg/xstkOper",
+          "headers": {},
+          "body": "{\"success\":true}"
+        },
+        "method": "POST",
+        "form": {
+          "jx0404id": "S1"
+        }
+      }
+    ],
+    "expectSubset": {
+      "ok": true,
+      "data": {
+        "confirmed": true
+      }
+    },
+    "confirmed": true
+  }
+]
